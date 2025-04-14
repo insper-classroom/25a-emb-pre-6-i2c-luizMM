@@ -28,8 +28,17 @@ void i2c_task(void *p) {
     buf_write[1] = 1 << 7;            // valor
     i2c_write_blocking(i2c_default, I2C_CHIP_ADDRESS, buf_write, 2, false);
 
-    // TODO
-    // Configure o acc para operar em 4G
+    vTaskDelay(pdMS_TO_TICKS(100));
+
+    // Sair do modo de sleep (bit 6 = 0 no registrador 0x6B)
+    buf_write[0] = MPUREG_PWR_MGMT_1;
+    buf_write[1] = 0x00;
+    i2c_write_blocking(i2c_default, I2C_CHIP_ADDRESS, buf_write, 2, false);
+
+    // Configurar o acelerômetro para 4G (bits 4:3 = 01 → valor 0x08 no registrador 0x1C)
+    buf_write[0] = MPUREG_ACCEL_CONFIG;
+    buf_write[1] = 0x08;  // ±4G
+    i2c_write_blocking(i2c_default, I2C_CHIP_ADDRESS, buf_write, 2, false);
 
     while (1) {
         vTaskDelay(pdMS_TO_TICKS(200));
